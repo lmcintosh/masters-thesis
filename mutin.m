@@ -3,6 +3,12 @@ function [h, Mut_Info]=mutin(a,b,binsB,minB,maxB) %returning HA
 % and mutual information Mut_Info of two
 % variables a and b
 
+if nargin < 4
+    minB = min(b(:));
+    maxB = max(b(:));
+end
+
+
 %% pA, pB, and pAB
 pA=zeros(binsB, 1);     % argue that binsB needs to equal binsA otherwise we throw away information by defn
 pB=zeros(binsB, 1);    
