@@ -12,7 +12,7 @@ from emailing import *
 
 
 try:
-    M     = 10e4
+    M     = 70
     nBins = 500
     adapt = linspace(0,25,100)
     
@@ -37,6 +37,12 @@ try:
         i_mem   = []
         i_pred  = []
         i_max   = []
+
+        minV = min(flatten(V))
+        maxV = max(flatten(V))
+        minC = min(flatten(stimulus))
+        maxC = max(flatten(stimulus))
+
         for i in xrange(shape(V)[1]-1):
             H, I = mutiN(V[:,i],stimulus[:,i],nBins,minV,maxV,minC,maxC)
             i_mem.append(I)
