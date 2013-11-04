@@ -22,9 +22,9 @@ try:
     sum_mem           = []
     sum_pred          = []
     sum_max           = []
-    i_mem_fnA         = np.zeros((3,1000))
-    i_pred_fnA        = np.zeros((3,1000))
-    i_max_fnA         = np.zeros((3,1000))
+    i_mem_fnA         = np.zeros((3,999))
+    i_pred_fnA        = np.zeros((3,999))
+    i_max_fnA         = np.zeros((3,999))
     
     for a in adapt:
         # run simulation
