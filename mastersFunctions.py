@@ -15,7 +15,7 @@ def aEIF(adaptationIndex, inputCurrent, v0):
     ----------
     adaptationIndex : degree to which neuron adapts
                     
-    inputCurrent : a list or np array of the stimulus
+    inputCurrent : np array of the stimulus with size (M,N)
     
     v0 : specify the membrane potential at time 0
  
@@ -42,7 +42,8 @@ def aEIF(adaptationIndex, inputCurrent, v0):
     
     # Simulation parameters
     delta = 0.5                      # dt
-    N     = len(inputCurrent)        # number of simulation points is determined by size of inputCurrent
+    M     = inputCurrent.shape[0]    # number of neurons
+    N     = inputCurrent.shape[1]    # number of simulation points is determined by size of inputCurrent
     T     = np.linspace(0,N*delta,N) # time points corresponding to inputCurrent (same size as V, w, I)
     
     # Thermodynamic parameters
@@ -50,22 +51,23 @@ def aEIF(adaptationIndex, inputCurrent, v0):
     beta = 1/(kB*310.65)        # kB times T where T is in Kelvin
     
     # Initialize variables
-    V       = np.zeros((N,))
-    w       = np.zeros((N,))
-    spikes  = np.zeros((N,))
+    V       = np.zeros((N,M))
+    w       = np.zeros((N,M))
+    spikes  = np.zeros((N,M))
     sptimes = []
     V[0]    = v0                # this gives us a chance to say what the membrane voltage starts at
                                 # so we can draw initial conditions from the Boltzmann dist. later
     
     # Run model
     for i in xrange(N-1):
-        V[i+1] = V[i] + (delta/C)*( -g_L*(V[i] - E_L) + g_L*delta_T*np.exp((V[i] - V_T)/delta_T) - w[i] + inputCurrent[i+1])
-        w[i+1] = w[i] + (delta/tau_w)*(a*(V[i] - E_L) - w[i])
+        V[i+1,:] = V[i,:] + (delta/C)*( -g_L*(V[i,:] - E_L) + g_L*delta_T*np.exp((V[i,:] - V_T)/delta_T) - w[i,:] + inputCurrent[:,i+1])
+        w[i+1,:] = w[i,:] + (delta/tau_w)*(a*(V[i,:] - E_L) - w[i,:])
     
         # spiking mechanism
-        if V[i+1] >= V_peak:
-            V[i+1]      = E_L
-            w[i+1]      = w[i] + b
+        ind = where(V[i+1,:] >= V_peak)
+        if size(ind[0]) > 0:
+            V[i+1,ind]  = E_L
+            w[i+1,ind]  = w[i] + b
             spikes[i+1] = 1
             sptimes.append(T[i+1])
     
@@ -113,7 +115,7 @@ def whiteNoise(meanCurrent,variance,N,M):
     x    = meanCurrent + np.sqrt(variance)*np.random.randn(N,M)
     x[0] = 0
     
-    return x
+    return x.transpose()
 
 
 def shotNoise(meanCurrent,variance,N,M):
@@ -127,33 +129,37 @@ def shotNoise(meanCurrent,variance,N,M):
     y    = t*np.exp(-t/tau)
     z    = np.zeros((N,M))
     for i in xrange(M):
-        z_i = scipy.signal.fftconvolve(x[:,i],y,mode="valid")
+        z_i    = np.convolve(x[:,i], y, mode = 'valid')
         z[:,i] = z_i
     z    = z - np.mean(z) + meanCurrent
     z[0] = 0
     
-    return z
+    return z.transpose()
 
 
-def ouProcess(meanCurrent,variance,N):
+def ouProcess(meanCurrent,variance,N,M):
     ''' shotNoise(meanCurrent, variance, N,M) '''
     
     dt    = 0.5
     tau   = 3 # ms
     tau2  = N/20
-    M     = 30
-    t     = linspace(0,M*dt,M)
+    F     = 30
+    t     = linspace(0,F*dt,F)
     t2    = linspace(0,N*dt,N)
-    x     = meanCurrent + np.sqrt(variance)*np.random.randn(N+M-1)
+    x     = meanCurrent + np.sqrt(variance)*np.random.randn(N+F-1,M)
     y     = np.exp(-t/tau)
     y2    = np.exp(-t2/tau2)
     z0    = 0
     drift = (z0 - meanCurrent)*y2
-    z     = np.convolve(x,y, mode = 'valid')
-    z     = z - np.mean(z) + meanCurrent + drift
+    z     = np.zeros((N,M))
+    for i in xrange(M):
+        z_i    = np.convolve(x[:,i], y, mode = 'valid')
+        z[:,i] = z_i
+    
+    z = z - np.mean(z) + meanCurrent + drift
     #z[0]  = z0
     
-    return z
+    return z.transpose()
 
 """
 brownian() implements one dimensional Brownian motion (i.e. the Wiener process).
