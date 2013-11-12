@@ -54,7 +54,7 @@ def aEIF(adaptationIndex, inputCurrent, v0):
     V       = np.zeros((N,M))
     w       = np.zeros((N,M))
     spikes  = np.zeros((N,M))
-    sptimes = [None]*M
+    sptimes = [[] for _ in xrange(M)]
     V[0]    = v0                # this gives us a chance to say what the membrane voltage starts at
                                 # so we can draw initial conditions from the Boltzmann dist. later
     
@@ -69,7 +69,7 @@ def aEIF(adaptationIndex, inputCurrent, v0):
             V[i+1,ind]      = E_L
             w[i+1,ind]      = w[i,ind] + b
             spikes[i+1,ind] = 1
-            sptimes[ind].append(T[i+1])
+            [sptimes[j].append(T[i+1]) for j in ind[0]]
     
     return [V.transpose(),w.transpose(),spikes.transpose(),sptimes]    
 
@@ -106,7 +106,7 @@ def stepFn(meanCurrent,variance,N, M):
     x    = meanCurrent*np.ones((N,M)) + np.sqrt(variance)*np.random.randn(N,M)
     x[0] = 0
     
-    return x
+    return x.transpose()
 
 
 def whiteNoise(meanCurrent,variance,N,M):
@@ -154,10 +154,7 @@ def ouProcess(meanCurrent,variance,N,M):
     z     = np.zeros((N,M))
     for i in xrange(M):
         z_i    = np.convolve(x[:,i], y, mode = 'valid')
-        z[:,i] = z_i
-    
-    z = z - np.mean(z) + meanCurrent + drift
-    #z[0]  = z0
+        z[:,i] = z_i - np.mean(z_i) + meanCurrent + drift
     
     return z.transpose()
 
@@ -264,13 +261,13 @@ def ensemble(adaptiveIndex, numNeurons, inputType, duration):
     T = np.linspace(0,N*delta,N) # time points corresponding to inputCurrent (same size as V, w, I)
     
     if inputType == 'step':
-        current = stepFn(meanCurrent,variance,N)
+        current = stepFn(meanCurrent,variance,N,M)
     elif inputType == 'white':
-        current = whiteNoise(meanCurrent,variance,N)
+        current = whiteNoise(meanCurrent,variance,N,M)
     elif inputType == 'ou':
-        current = ouProcess(meanCurrent,variance,N)
+        current = ouProcess(meanCurrent,variance,N,M)
     elif inputType == 'shotnoise':
-        current = shotNoise(meanCurrent,variance,N)
+        current = shotNoise(meanCurrent,variance,N,M)
     elif inputType == 'brownian':
         current = brownian(np.ones((M,)) * meanCurrent, N, delta, variance/25.0, out=None)
         current[:,0] = x0
