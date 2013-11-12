@@ -67,9 +67,9 @@ def aEIF(adaptationIndex, inputCurrent, v0):
         ind = where(V[i+1,:] >= V_peak)
         if size(ind[0]) > 0:
             V[i+1,ind]      = E_L
-            w[i+1,ind]      = w[i] + b
+            w[i+1,ind]      = w[i,ind] + b
             spikes[i+1,ind] = 1
-            sptimes[where].append(T[i+1])
+            sptimes[ind].append(T[i+1])
     
     return [V.transpose(),w.transpose(),spikes.transpose(),sptimes]    
 
@@ -272,7 +272,7 @@ def ensemble(adaptiveIndex, numNeurons, inputType, duration):
     elif inputType == 'shotnoise':
         current = shotNoise(meanCurrent,variance,N)
     elif inputType == 'brownian':
-        current = brownian(meanCurrent, N, delta, variance/25.0, out=None)
+        current = brownian(np.ones((M,)) * meanCurrent, N, delta, variance/25.0, out=None)
         current[:,0] = x0
         
     V,w,spikes,sptimes = aEIF(a, current, v0)
