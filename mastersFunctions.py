@@ -98,34 +98,37 @@ def raster(event_times_list, color='k'):
 
 
 # Define input current types
-def stepFn(meanCurrent,variance,N):
-    ''' stepFn(meanCurrent, variance, N) '''
+def stepFn(meanCurrent,variance,N, M):
+    ''' stepFn(meanCurrent, variance, N,M) '''
     
-    x    = meanCurrent*np.ones((N,)) + np.sqrt(variance)*np.random.randn(N)
+    x    = meanCurrent*np.ones((N,M)) + np.sqrt(variance)*np.random.randn(N,M)
     x[0] = 0
     
     return x
 
 
-def whiteNoise(meanCurrent,variance,N):
-    ''' whiteNoise(meanCurrent, variance, N) '''
+def whiteNoise(meanCurrent,variance,N,M):
+    ''' whiteNoise(meanCurrent, variance, N,M) '''
     
-    x    = meanCurrent + np.sqrt(variance)*np.random.randn(N)
+    x    = meanCurrent + np.sqrt(variance)*np.random.randn(N,M)
     x[0] = 0
     
     return x
 
 
-def shotNoise(meanCurrent,variance,N):
-    ''' shotNoise(meanCurrent, variance, N) '''
+def shotNoise(meanCurrent,variance,N,M):
+    ''' shotNoise(meanCurrent, variance, N,M) '''
     
     dt   = 0.5
     tau  = 3 # ms
-    M    = 30
-    t    = linspace(0,M*dt,M)
-    x    = meanCurrent + np.sqrt(variance)*np.random.randn(N+M-1)
+    F    = 30
+    t    = linspace(0,F*dt,F)
+    x    = meanCurrent + np.sqrt(variance)*np.random.randn(N+F-1,M)
     y    = t*np.exp(-t/tau)
-    z    = np.convolve(x,y, mode = 'valid')
+    z    = np.zeros((N,M))
+    for i in xrange(M):
+        z_i = scipy.signal.fftconvolve(x[:,i],y,mode="valid")
+        z[:,i] = z_i
     z    = z - np.mean(z) + meanCurrent
     z[0] = 0
     
@@ -133,7 +136,7 @@ def shotNoise(meanCurrent,variance,N):
 
 
 def ouProcess(meanCurrent,variance,N):
-    ''' shotNoise(meanCurrent, variance, N) '''
+    ''' shotNoise(meanCurrent, variance, N,M) '''
     
     dt    = 0.5
     tau   = 3 # ms
