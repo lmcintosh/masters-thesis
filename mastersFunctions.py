@@ -54,7 +54,7 @@ def aEIF(adaptationIndex, inputCurrent, v0):
     V       = np.zeros((N,M))
     w       = np.zeros((N,M))
     spikes  = np.zeros((N,M))
-    sptimes = []
+    sptimes = [None]*M
     V[0]    = v0                # this gives us a chance to say what the membrane voltage starts at
                                 # so we can draw initial conditions from the Boltzmann dist. later
     
@@ -66,12 +66,12 @@ def aEIF(adaptationIndex, inputCurrent, v0):
         # spiking mechanism
         ind = where(V[i+1,:] >= V_peak)
         if size(ind[0]) > 0:
-            V[i+1,ind]  = E_L
-            w[i+1,ind]  = w[i] + b
-            spikes[i+1] = 1
-            sptimes.append(T[i+1])
+            V[i+1,ind]      = E_L
+            w[i+1,ind]      = w[i] + b
+            spikes[i+1,ind] = 1
+            sptimes[where].append(T[i+1])
     
-    return [V,w,spikes,sptimes]    
+    return [V.transpose(),w.transpose(),spikes.transpose(),sptimes]    
 
 
 # Define raster plot
@@ -261,27 +261,21 @@ def ensemble(adaptiveIndex, numNeurons, inputType, duration):
     x0          = 0.0
     
     # initialize variables
-    V       = [None]*M
-    w       = [None]*M
-    spikes  = [None]*M
-    sptimes = [None]*M
-    current = [None]*M
-    T       = np.linspace(0,N*delta,N) # time points corresponding to inputCurrent (same size as V, w, I)
+    T = np.linspace(0,N*delta,N) # time points corresponding to inputCurrent (same size as V, w, I)
     
-    for m in xrange(M):
-        if inputType == 'step':
-            current[m] = stepFn(meanCurrent,variance,N)
-        elif inputType == 'white':
-            current[m] = whiteNoise(meanCurrent,variance,N)
-        elif inputType == 'ou':
-            current[m] = ouProcess(meanCurrent,variance,N)
-        elif inputType == 'shotnoise':
-            current[m] = shotNoise(meanCurrent,variance,N)
-        elif inputType == 'brownian':
-            current[m] = brownian(meanCurrent, N, delta, variance/25.0, out=None)
-            current[m][0] = x0
+    if inputType == 'step':
+        current = stepFn(meanCurrent,variance,N)
+    elif inputType == 'white':
+        current = whiteNoise(meanCurrent,variance,N)
+    elif inputType == 'ou':
+        current = ouProcess(meanCurrent,variance,N)
+    elif inputType == 'shotnoise':
+        current = shotNoise(meanCurrent,variance,N)
+    elif inputType == 'brownian':
+        current = brownian(meanCurrent, N, delta, variance/25.0, out=None)
+        current[:,0] = x0
         
-        V[m],w[m],spikes[m],sptimes[m] = aEIF(a, current[m], v0)
+    V,w,spikes,sptimes = aEIF(a, current, v0)
         
     return V, w, spikes, sptimes, T, current
 
