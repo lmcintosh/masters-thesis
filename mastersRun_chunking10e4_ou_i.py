@@ -13,11 +13,17 @@ from emailing import *
 
 try:
     stim_type = 'ou'
+    version   = 0
 
     M     = int(10e4)
     nBins = 250
     adapt = np.linspace(0,25,100)
-    adapt = adapt[0:30]
+    if version == 0:
+        adapt = adapt[0:30]
+    elif version == 1:
+        adapt = adapt[30:60]
+    elif version == 2:
+        adapt = adapt[60:100]
     
     steady_state_mem  = []
     steady_state_pred = []

@@ -12,10 +12,18 @@ from emailing import *
 
 
 try:
+    stim_type = 'brownian'
+    version   = 0
+
     M     = int(10e4)
     nBins = 250
     adapt = np.linspace(0,25,100)
-    adapt = adapt[0:30]
+    if version == 0:
+        adapt = adapt[0:30]
+    elif version == 1:
+        adapt = adapt[30:60]
+    elif version == 2:
+        adapt = adapt[60:100]
     
     steady_state_mem  = []
     steady_state_pred = []
@@ -29,7 +37,7 @@ try:
     
     for a in adapt:
         # run simulation
-        V,w,spikes,sptimes,T,stimulus = ensemble(a,int(M),'brownian',1000)
+        V,w,spikes,sptimes,T,stimulus = ensemble(a,int(M),stim_type,1000)
         
         V        = np.asarray(V)
         stimulus = np.asarray(stimulus)
@@ -42,10 +50,13 @@ try:
         i_max   = []
         i_max2  = []
 
-        minV = min(flatten(V))
-        maxV = max(flatten(V))
-        minC = min(flatten(stimulus))
-        maxC = max(flatten(stimulus))
+        # I used to flatten V, stimulus but this not only takes a long time
+        # but gives unfair advantage to nonspiking Vs when the range is smaller
+        # and discrimination is effectively much higher
+        minV = -73.0
+        maxV = 20.0
+        minC = 0.0
+        maxC = 880.0
 
         for i in xrange(shape(V)[1]-1):
             H, I = mutiN(V[:,i],stimulus[:,i],nBins,minV,maxV,minC,maxC)
@@ -84,13 +95,13 @@ try:
     
     
 
-        with open('masters_data_steadyState_a' + str(a) + '_' + str(datetime.date.today()) + '.pik', 'wb') as f:
+        with open('masters_data_steadyState_' + str(stim_type) + '_a' + str(a) + '_' + str(datetime.date.today()) + '.pik', 'wb') as f:
             pickle.dump([steady_state_mem, steady_state_pred, steady_state_max], f, -1)
 
-        with open('masters_data_sum_a' + str(a) + '_' + str(datetime.date.today()) + '.pik', 'wb') as f:
+        with open('masters_data_sum_' + str(stim_type) + '_a' + str(a) + '_' + str(datetime.date.today()) + '.pik', 'wb') as f:
             pickle.dump([sum_mem, sum_pred, sum_max], f, -1)
 
-        with open('masters_data_examples_a' + str(a) + '_' + str(datetime.date.today()) + '.pik', 'wb') as f:
+        with open('masters_data_examples_' + str(stim_type) + '_a' + str(a) + '_' + str(datetime.date.today()) + '.pik', 'wb') as f:
             pickle.dump([i_mem_fnA, i_pred_fnA, i_max_fnA], f, -1)
 
 
