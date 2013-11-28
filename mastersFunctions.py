@@ -4,6 +4,7 @@ import numpy as np
 from pylab import *
 from scipy import *
 from matplotlib import *
+import pyentropy
 
 
 # Adaptive exponential integrate-and-fire neuron
@@ -39,6 +40,7 @@ def aEIF(adaptationIndex, inputCurrent, v0):
     V_peak  = 20     # when to call action potential in mV
     b       = 0.0805 # spike-triggered adaptation
     a       = adaptationIndex
+    noiseT  = 0.5
     
     # Simulation parameters
     delta = 0.5                      # dt
@@ -60,7 +62,7 @@ def aEIF(adaptationIndex, inputCurrent, v0):
     
     # Run model
     for i in xrange(N-1):
-        V[i+1,:] = V[i,:] + (delta/C)*( -g_L*(V[i,:] - E_L) + g_L*delta_T*np.exp((V[i,:] - V_T)/delta_T) - w[i,:] + inputCurrent[:,i+1])
+        V[i+1,:] = V[i,:] + (delta/C)*( -g_L*(V[i,:] - E_L) + g_L*delta_T*np.exp((V[i,:] - V_T)/delta_T) - w[i,:] + inputCurrent[:,i+1]) + np.sqrt(noiseT)*randn(1,M)
         w[i+1,:] = w[i,:] + (delta/tau_w)*(a*(V[i,:] - E_L) - w[i,:])
     
         # spiking mechanism
@@ -329,3 +331,30 @@ def mutiN(voltage, current, nBins, minV, maxV, minC, maxC):
     I = HA + HB - HAB
     
     return H, I
+
+
+
+def binaryWordsInformation(spikes,stimulus):
+    '''Compute entropy of spike trains with binary words approach.
+    
+    Spikes and stimulus are both 1-d vertical numpy arrays
+    with as many elements as neurons.
+    '''
+    # Quantize stimulus and
+    # align spikes & stim for entropy calculation
+    numNeurons = len(spikes)
+    spikes     = spikes.flatten()   # get in format (numNeurons,)
+    stimulus   = stimulus.flatten() # get in format (numNeurons,)
+    if len(np.unique(spikes)) > 2:
+        spikes = pyentropy.quantise(spikes, 2, uniform='sampling', minmax=None, centers=True)
+        spikes = spikes[0]
+    else:
+        spikes     = spikes.astype(int) # make integer array from float64 array
+    stim_quant = pyentropy.quantise(stimulus, 2, uniform='sampling', minmax=None, centers=True)
+    system     = pyentropy.DiscreteSystem(spikes, (1,numNeurons), stim_quant[0], (1,numNeurons))
+    
+    # compute entropies
+    system.calculate_entropies(method='plugin', calc=['HX', 'HXY'])
+    
+    # return information between spikes and stimulus
+    return system.I()

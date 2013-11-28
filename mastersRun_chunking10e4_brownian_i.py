@@ -36,8 +36,11 @@ try:
         
         # compute i_mem, i_pred, i_max
         i_mem   = []
+        i_mem2  = []
         i_pred  = []
+        i_pred2 = []
         i_max   = []
+        i_max2  = []
 
         minV = min(flatten(V))
         maxV = max(flatten(V))
@@ -46,11 +49,17 @@ try:
 
         for i in xrange(shape(V)[1]-1):
             H, I = mutiN(V[:,i],stimulus[:,i],nBins,minV,maxV,minC,maxC)
+            I2   = binaryWordsInformation(spikes[:,i],stimulus[:,i])
             i_mem.append(I)
+            i_mem2.append(I2)
             H, I = mutiN(V[:,i],stimulus[:,i+1],nBins,minV,maxV,minC,maxC)
+            I2   = binaryWordsInformation(spikes[:,i],stimulus[:,i+1])
             i_pred.append(I)
+            i_pred2.append(I2)
             H, I = mutiN(stimulus[:,i],stimulus[:,i+1],nBins,minC,maxC,minC,maxC)
+            I2   = binaryWordsInformation(stimulus[:,i],stimulus[:,i+1])
             i_max.append(I)
+            i_max2.append(I2)
     
         steady_state_mem.append(i_mem[-1])
         steady_state_pred.append(i_pred[-1])
