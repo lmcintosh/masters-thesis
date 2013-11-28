@@ -12,8 +12,6 @@ from emailing import *
 
 
 try:
-    stim_type = 'brownian'
-
     M     = int(10e4)
     nBins = 250
     adapt = np.linspace(0,25,100)
@@ -31,7 +29,7 @@ try:
     
     for a in adapt:
         # run simulation
-        V,w,spikes,sptimes,T,stimulus = ensemble(a,int(M),stim_type,1000)
+        V,w,spikes,sptimes,T,stimulus = ensemble(a,int(M),'brownian',1000)
         
         V        = np.asarray(V)
         stimulus = np.asarray(stimulus)
@@ -77,13 +75,13 @@ try:
     
     
 
-        with open('masters_data_steadyState_' + str(stim_type) + '_a' + str(a) + '_' + str(datetime.date.today()) + '.pik', 'wb') as f:
+        with open('masters_data_steadyState_a' + str(a) + '_' + str(datetime.date.today()) + '.pik', 'wb') as f:
             pickle.dump([steady_state_mem, steady_state_pred, steady_state_max], f, -1)
 
-        with open('masters_data_sum_' + str(stim_type) + '_a' + str(a) + '_' + str(datetime.date.today()) + '.pik', 'wb') as f:
+        with open('masters_data_sum_a' + str(a) + '_' + str(datetime.date.today()) + '.pik', 'wb') as f:
             pickle.dump([sum_mem, sum_pred, sum_max], f, -1)
 
-        with open('masters_data_examples_' + str(stim_type) + '_a' + str(a) + '_' + str(datetime.date.today()) + '.pik', 'wb') as f:
+        with open('masters_data_examples_a' + str(a) + '_' + str(datetime.date.today()) + '.pik', 'wb') as f:
             pickle.dump([i_mem_fnA, i_pred_fnA, i_max_fnA], f, -1)
 
 

@@ -17,7 +17,7 @@ try:
     M     = int(10e4)
     nBins = 250
     adapt = np.linspace(0,25,100)
-    adapt = adapt[60:100]
+    adapt = adapt[98:100]
     
     steady_state_mem  = []
     steady_state_pred = []
