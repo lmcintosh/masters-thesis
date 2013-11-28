@@ -340,21 +340,7 @@ def binaryWordsInformation(spikes,stimulus):
     Spikes and stimulus are both 1-d vertical numpy arrays
     with as many elements as neurons.
     '''
-    # Quantize stimulus and
-    # align spikes & stim for entropy calculation
-    numNeurons = len(spikes)
-    spikes     = spikes.flatten()   # get in format (numNeurons,)
-    stimulus   = stimulus.flatten() # get in format (numNeurons,)
-    if len(np.unique(spikes)) > 2:
-        spikes = pyentropy.quantise(spikes, 2, uniform='sampling', minmax=None, centers=True)
-        spikes = spikes[0]
-    else:
-        spikes     = spikes.astype(int) # make integer array from float64 array
-    stim_quant = pyentropy.quantise(stimulus, 2, uniform='sampling', minmax=None, centers=True)
-    system     = pyentropy.DiscreteSystem(spikes, (1,numNeurons), stim_quant[0], (1,numNeurons))
+    nBins = 2
+    H, I  = mutiN(spikes,stimulus,nBins,0,1,0,880)
     
-    # compute entropies
-    system.calculate_entropies(method='plugin', calc=['HX', 'HXY'])
-    
-    # return information between spikes and stimulus
-    return system.I()
+    return I
