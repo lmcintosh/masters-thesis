@@ -4,7 +4,7 @@ import numpy as np
 from pylab import *
 from scipy import *
 from matplotlib import *
-import pyentropy
+#import pyentropy
 
 
 # Adaptive exponential integrate-and-fire neuron
