@@ -40,7 +40,7 @@ def aEIF(adaptationIndex, inputCurrent, v0):
     V_peak  = 20     # when to call action potential in mV
     b       = 0.0805 # spike-triggered adaptation
     a       = adaptationIndex
-    noiseT  = 0.5
+    noiseT  = 0.3
     
     # Simulation parameters
     delta = 0.5                      # dt
