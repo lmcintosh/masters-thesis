@@ -45,6 +45,8 @@ try:
     i_max_fnA2         = np.zeros((3,999))
     
     for a in adapt:
+        print str(a)
+
         # run simulation
         V,w,spikes,sptimes,T,stimulus = ensemble(a,int(M),stim_type,1000)
         
