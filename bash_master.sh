@@ -12,8 +12,6 @@ do sshpass -p $PASSWORD ssh lanemc@corn.stanford.edu 'cd ~/masters/python/; pyth
 
 done
 
-#sshpass -p $PASSWORD ssh lanemc@corn.stanford.edu 'cd ~/masters/python/; rm masters_data_examples2_* &'
-
 
 # prepare corn for running a long program in a screen session
 #pagsh
