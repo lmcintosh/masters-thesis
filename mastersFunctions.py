@@ -120,11 +120,11 @@ def whiteNoise(meanCurrent,variance,N,M):
     return x.transpose()
 
 
-def shotNoise(meanCurrent,variance,N,M):
+def shotNoise(meanCurrent,variance,N,M,tau=3):
     ''' shotNoise(meanCurrent, variance, N,M) '''
     
     dt   = 0.5
-    tau  = 3 # ms
+    #tau  = 3 # ms
     F    = 30
     t    = linspace(0,F*dt,F)
     x    = meanCurrent + np.sqrt(variance)*np.random.randn(N+F-1,M)
@@ -234,7 +234,7 @@ def brownian(x0, n, dt, delta, out=None):
 
 
 
-def ensemble(adaptiveIndex, numNeurons, inputType, duration):
+def ensemble(adaptiveIndex, numNeurons, inputType, duration, tau=3):
     ''' Simulates an ensemble of neurons
     
     inputs: adaptiveIndex, numNeurons, and inputType
@@ -269,7 +269,7 @@ def ensemble(adaptiveIndex, numNeurons, inputType, duration):
     elif inputType == 'ou':
         current = ouProcess(meanCurrent,variance,N,M)
     elif inputType == 'shotnoise':
-        current = shotNoise(meanCurrent,variance,N,M)
+        current = shotNoise(meanCurrent,variance,N,M,tau)
     elif inputType == 'brownian':
         current = brownian(np.ones((M,)) * meanCurrent, N, delta, variance/25.0, out=None)
         current[:,0] = x0

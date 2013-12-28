@@ -4,12 +4,11 @@
 echo "Please enter password for lanemc@corn.stanford.edu"
 read PASSWORD
 
+LIST="$(ls ~/Git/masters-thesis/run_these)"
 
-#cd ~/Git/masters-thesis/run_these/
-for i in 'ls ~/Git/masters-thesis/run_these/';
-# ssh into corn
-do sshpass -p $PASSWORD ssh lanemc@corn.stanford.edu 'cd ~/masters/python/; python "$i" &' &;
-
+for i in "$LIST"; do
+    sshpass -p $PASSWORD ssh lanemc@corn.stanford.edu "python ~/masters/python/"$i" &" &
+    sleep 0.5
 done
 
 
