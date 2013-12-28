@@ -14,7 +14,7 @@ from emailing import *
 # read flags from command line;
 # sys.argv[0] is name of file
 version = sys.argv[1]
-tau     = sys.argv[2]
+tau     = float(sys.argv[2])
 
 
 try:
